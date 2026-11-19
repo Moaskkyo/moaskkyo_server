@@ -16,6 +16,11 @@ public enum ErrorCode {
     INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "다시 로그인해 주세요."),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "로그인이 필요해요."),
 
+    INVALID_DATE_RANGE(HttpStatus.BAD_REQUEST, "조회 기간을 확인해 주세요."),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자 정보를 찾을 수 없어요."),
+    CALENDAR_SETTING_NOT_FOUND(HttpStatus.NOT_FOUND, "캘린더 설정을 찾을 수 없어요."),
+    EXTERNAL_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "일정 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요."),
+
     FORBIDDEN(HttpStatus.FORBIDDEN, "접근할 수 없어요."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버에 문제가 생겼어요. 잠시 후 다시 시도해 주세요.");
 
