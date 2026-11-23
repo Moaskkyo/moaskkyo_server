@@ -3,6 +3,8 @@ package com.moaskkyo.server.domain.calendar.domain;
 import com.moaskkyo.server.domain.school.domain.School;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -31,6 +33,10 @@ public class Academic {
     @JoinColumn(name = "school_id", nullable = false)
     private School school;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private AcademicType type;
+
     @Column(name = "title", nullable = false)
     private String title;
 
@@ -41,8 +47,9 @@ public class Academic {
     private LocalDate endDate;
 
     @Builder
-    private Academic(School school, String title, LocalDate startDate, LocalDate endDate) {
+    private Academic(School school, AcademicType type, String title, LocalDate startDate, LocalDate endDate) {
         this.school = school;
+        this.type = type;
         this.title = title;
         this.startDate = startDate;
         this.endDate = endDate;
