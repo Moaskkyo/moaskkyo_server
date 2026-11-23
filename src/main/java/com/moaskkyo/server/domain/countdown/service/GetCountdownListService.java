@@ -97,7 +97,7 @@ public class GetCountdownListService {
     }
 
     // 하루 단위로 내려온 일정 중 이름이 같고 날짜가 이어지는 것을 한 기간으로 묶어,
-    // 아직 끝나지 않은 기간 가운데 가장 빨리 시작한 것을 고른다. (기간 중이면 그 일정을 계속 보여준다)
+    // 오늘 이후에 시작하는 기간 가운데 가장 빠른 것을 고른다. (이미 시작한 일정은 건너뛴다)
     private CountdownSummaryResponse resolveSchedule(CountdownType type, String defaultTitle,
                                                      List<ExternalSchedule> schedules, LocalDate today,
                                                      Predicate<String> matcher, UnaryOperator<String> titleMapper) {
@@ -117,7 +117,7 @@ public class GetCountdownListService {
                     && matched.get(index).date().equals(endDate.plusDays(1))) {
                 endDate = matched.get(index++).date();
             }
-            if (!endDate.isBefore(today) && (found == null || first.date().isBefore(found.date()))) {
+            if (!first.date().isBefore(today) && (found == null || first.date().isBefore(found.date()))) {
                 found = first;
             }
         }
@@ -128,10 +128,14 @@ public class GetCountdownListService {
 
     // TODO: NEIS 일정명으로 판별한다. 학교마다 표기가 달라 누락, 오탐이 있으면 조건을 넓혀야 한다.
     private boolean isVacation(String title) {
-        if (title.contains("방학식") || title.contains("토요휴업일") || title.contains("재량휴업일")) {
+        if (title.contains("방학식")) {
             return false;
         }
-        return title.contains("방학") || title.contains("휴업일");
+        if (title.contains("방학")) {
+            return true;
+        }
+        // 휴업일은 하계, 동계만 방학으로 본다. (재량휴업일, 토요휴업일은 방학이 아니다)
+        return title.contains("휴업일") && (title.contains("하계") || title.contains("동계"));
     }
 
     private boolean isExam(String title) {
