@@ -12,7 +12,6 @@ import com.moaskkyo.server.domain.user.domain.User;
 import com.moaskkyo.server.domain.user.domain.repository.UserRepository;
 import com.moaskkyo.server.global.auth.Role;
 import com.moaskkyo.server.global.client.ExternalSchedule;
-import com.moaskkyo.server.global.client.neis.NeisScheduleClient;
 import com.moaskkyo.server.global.error.BusinessException;
 import com.moaskkyo.server.global.error.ErrorCode;
 import java.time.Clock;
@@ -26,10 +25,8 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GetCountdownListService {
@@ -41,14 +38,17 @@ public class GetCountdownListService {
     private static final String EXAM_TITLE = "시험";
     private static final String MIDTERM_TITLE = "중간고사";
     private static final String FINAL_TITLE = "기말고사";
+    private static final String WRITTEN_TEST_TITLE = "지필평가";
 
-    // 올해 전체와 다음 해 3월까지 조회한다. (다음 해 1학기 시작 전 일정까지 포함)
+    // 해를 넘겨 이어지는 겨울방학의 시작일이 잘리지 않도록 지난해 12월부터,
+    // 다음 해 1학기 시작 전 일정까지 담기도록 다음 해 3월까지 조회한다.
+    private static final Month SEARCH_START_MONTH = Month.DECEMBER;
     private static final Month SEARCH_END_MONTH = Month.MARCH;
 
     private final UserRepository userRepository;
     private final TeacherRepository teacherRepository;
     private final HomeTimeRepository homeTimeRepository;
-    private final NeisScheduleClient neisScheduleClient;
+    private final SchoolScheduleReader schoolScheduleReader;
     private final Clock clock;
 
     // 외부 API를 호출하는 동안 DB 커넥션을 잡고 있지 않도록 트랜잭션으로 묶지 않는다.
@@ -81,16 +81,10 @@ public class GetCountdownListService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
-    // NEIS가 응답하지 않아도 하교 남은 시간은 내려갈 수 있도록 빈 목록으로 넘긴다.
     private List<ExternalSchedule> fetchSchedules(School school, LocalDate today) {
-        LocalDate from = LocalDate.of(today.getYear(), Month.JANUARY, 1);
+        LocalDate from = LocalDate.of(today.getYear() - 1, SEARCH_START_MONTH, 1);
         LocalDate to = LocalDate.of(today.getYear() + 1, SEARCH_END_MONTH, SEARCH_END_MONTH.length(false));
-        try {
-            return neisScheduleClient.getSchedules(school.getAtptCode(), school.getSchoolCode(), from, to);
-        } catch (BusinessException e) {
-            log.warn("NEIS 학사일정을 불러오지 못해 방학, 시험 일정을 비웁니다.", e);
-            return List.of();
-        }
+        return schoolScheduleReader.read(school.getAtptCode(), school.getSchoolCode(), from, to);
     }
 
     // 하교 시각이 지나도 당일에는 그대로 내려주고, 날짜가 바뀌면 그날의 하교 시각으로 바뀐다.
@@ -141,7 +135,7 @@ public class GetCountdownListService {
     }
 
     private boolean isExam(String title) {
-        return title.contains(MIDTERM_TITLE) || title.contains(FINAL_TITLE);
+        return title.contains(MIDTERM_TITLE) || title.contains(FINAL_TITLE) || title.contains(WRITTEN_TEST_TITLE);
     }
 
     private String vacationTitle(String title) {
@@ -155,7 +149,13 @@ public class GetCountdownListService {
     }
 
     private String examTitle(String title) {
-        return title.contains(MIDTERM_TITLE) ? MIDTERM_TITLE : FINAL_TITLE;
+        if (title.contains(MIDTERM_TITLE)) {
+            return MIDTERM_TITLE;
+        }
+        if (title.contains(FINAL_TITLE)) {
+            return FINAL_TITLE;
+        }
+        return WRITTEN_TEST_TITLE;
     }
 
     private CountdownSummaryResponse countdown(CountdownType type, String title, LocalDateTime targetAt) {
