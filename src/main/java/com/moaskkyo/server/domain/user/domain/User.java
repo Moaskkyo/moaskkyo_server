@@ -80,4 +80,9 @@ public class User {
         }
         return birthday.equals(MonthDay.from(today));
     }
+
+    // 2월 29일생은 윤년이 아닌 해에 2월 28일로 맞춰진다.
+    public LocalDate birthdayIn(int year) {
+        return MonthDay.from(birth).atYear(year);
+    }
 }

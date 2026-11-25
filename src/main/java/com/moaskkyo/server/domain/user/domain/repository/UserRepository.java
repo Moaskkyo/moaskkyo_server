@@ -2,6 +2,7 @@ package com.moaskkyo.server.domain.user.domain.repository;
 
 import com.moaskkyo.server.domain.school.domain.School;
 import com.moaskkyo.server.domain.user.domain.User;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,4 +20,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("select u from User u join fetch u.school where u.userId = :userId")
     Optional<User> findWithSchoolByUserId(@Param("userId") Long userId);
+
+    @Query("select u from User u where u.school = :school "
+            + "and exists (select 1 from UserSetting us where us.user = u and us.birthdayPublic = true)")
+    List<User> findAllBySchoolAndBirthdayPublic(@Param("school") School school);
 }
