@@ -1,7 +1,9 @@
 package com.moaskkyo.server.domain.calendar.presentation;
 
 import com.moaskkyo.server.domain.calendar.presentation.dto.response.GetAcademicScheduleListResponse;
+import com.moaskkyo.server.domain.calendar.presentation.dto.response.GetAssessmentScheduleListResponse;
 import com.moaskkyo.server.domain.calendar.service.GetAcademicScheduleListService;
+import com.moaskkyo.server.domain.calendar.service.GetAssessmentScheduleListService;
 import com.moaskkyo.server.global.auth.JwtTokenProvider;
 import com.moaskkyo.server.global.auth.Role;
 import java.time.LocalDate;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CalendarController {
 
     private final GetAcademicScheduleListService getAcademicScheduleListService;
+    private final GetAssessmentScheduleListService getAssessmentScheduleListService;
 
     @GetMapping("/academics")
     @ResponseStatus(HttpStatus.OK)
@@ -32,5 +35,16 @@ public class CalendarController {
         Long userId = Long.valueOf(jwt.getSubject());
         Role role = Role.valueOf(jwt.getClaimAsString(JwtTokenProvider.CLAIM_ROLE));
         return getAcademicScheduleListService.execute(userId, role, startDate, endDate);
+    }
+
+    @GetMapping("/assessments")
+    @ResponseStatus(HttpStatus.OK)
+    public GetAssessmentScheduleListResponse getAssessmentScheduleList(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        Long userId = Long.valueOf(jwt.getSubject());
+        Role role = Role.valueOf(jwt.getClaimAsString(JwtTokenProvider.CLAIM_ROLE));
+        return getAssessmentScheduleListService.execute(userId, role, startDate, endDate);
     }
 }
