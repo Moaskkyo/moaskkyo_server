@@ -3,7 +3,9 @@ package com.moaskkyo.server.domain.calendar.presentation;
 import com.moaskkyo.server.domain.calendar.presentation.dto.response.GetAcademicScheduleListResponse;
 import com.moaskkyo.server.domain.calendar.presentation.dto.response.GetAssessmentScheduleListResponse;
 import com.moaskkyo.server.domain.calendar.service.GetAcademicScheduleListService;
+import com.moaskkyo.server.domain.calendar.presentation.dto.response.GetBirthdayListResponse;
 import com.moaskkyo.server.domain.calendar.service.GetAssessmentScheduleListService;
+import com.moaskkyo.server.domain.calendar.service.GetBirthdayListService;
 import com.moaskkyo.server.global.auth.JwtTokenProvider;
 import com.moaskkyo.server.global.auth.Role;
 import java.time.LocalDate;
@@ -25,6 +27,7 @@ public class CalendarController {
 
     private final GetAcademicScheduleListService getAcademicScheduleListService;
     private final GetAssessmentScheduleListService getAssessmentScheduleListService;
+    private final GetBirthdayListService getBirthdayListService;
 
     @GetMapping("/academics")
     @ResponseStatus(HttpStatus.OK)
@@ -46,5 +49,16 @@ public class CalendarController {
         Long userId = Long.valueOf(jwt.getSubject());
         Role role = Role.valueOf(jwt.getClaimAsString(JwtTokenProvider.CLAIM_ROLE));
         return getAssessmentScheduleListService.execute(userId, role, startDate, endDate);
+    }
+
+    @GetMapping("/birthdays")
+    @ResponseStatus(HttpStatus.OK)
+    public GetBirthdayListResponse getBirthdayList(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        Long userId = Long.valueOf(jwt.getSubject());
+        Role role = Role.valueOf(jwt.getClaimAsString(JwtTokenProvider.CLAIM_ROLE));
+        return getBirthdayListService.execute(userId, role, startDate, endDate);
     }
 }
