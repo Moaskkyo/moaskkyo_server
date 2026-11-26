@@ -22,6 +22,9 @@ public enum ErrorCode {
     EXTERNAL_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "일정 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요."),
 
     FORBIDDEN(HttpStatus.FORBIDDEN, "접근할 수 없어요."),
+    FORBIDDEN_ROLE(HttpStatus.FORBIDDEN, "학생 계정만 사용할 수 있어요."),
+    INVALID_IMAGE_TYPE(HttpStatus.BAD_REQUEST, "PNG 파일이 아니라서 올리지 못했어요"),
+    IMAGE_TOO_LARGE(HttpStatus.valueOf(413), "이미지 용량이 너무 커요. 더 작은 이미지를 올려 주세요."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버에 문제가 생겼어요. 잠시 후 다시 시도해 주세요.");
 
     private final HttpStatus status;
