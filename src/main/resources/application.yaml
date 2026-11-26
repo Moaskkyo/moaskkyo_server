@@ -11,6 +11,10 @@ spring:
     open-in-view: false
     hibernate:
       ddl-auto: ${DB_DDL_AUTO:none}
+  jackson:
+    mapper:
+      # 요청 본문의 "true"(문자열), 1(숫자)을 Boolean 등으로 바꿔 받지 않고 400으로 거절한다.
+      allow-coercion-of-scalars: false
 
 jwt:
   secret: ${JWT_SECRET}

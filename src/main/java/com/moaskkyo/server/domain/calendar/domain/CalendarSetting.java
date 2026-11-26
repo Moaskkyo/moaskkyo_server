@@ -49,4 +49,17 @@ public class CalendarSetting {
         this.showAssessment = true;
         this.showBirthday = true;
     }
+
+    // null로 넘어온 항목은 바꾸지 않고 기존 값을 유지한다.
+    public void update(Boolean showAcademic, Boolean showAssessment, Boolean showBirthday) {
+        if (showAcademic != null) {
+            this.showAcademic = showAcademic;
+        }
+        if (showAssessment != null) {
+            this.showAssessment = showAssessment;
+        }
+        if (showBirthday != null) {
+            this.showBirthday = showBirthday;
+        }
+    }
 }
