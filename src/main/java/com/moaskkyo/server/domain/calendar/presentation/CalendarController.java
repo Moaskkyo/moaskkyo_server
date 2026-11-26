@@ -6,6 +6,9 @@ import com.moaskkyo.server.domain.calendar.service.GetAcademicScheduleListServic
 import com.moaskkyo.server.domain.calendar.presentation.dto.response.GetBirthdayListResponse;
 import com.moaskkyo.server.domain.calendar.service.GetAssessmentScheduleListService;
 import com.moaskkyo.server.domain.calendar.service.GetBirthdayListService;
+import com.moaskkyo.server.domain.calendar.presentation.dto.request.UpdateCalendarSettingRequest;
+import com.moaskkyo.server.domain.calendar.presentation.dto.response.UpdateCalendarSettingResponse;
+import com.moaskkyo.server.domain.calendar.service.UpdateCalendarSettingService;
 import com.moaskkyo.server.global.auth.JwtTokenProvider;
 import com.moaskkyo.server.global.auth.Role;
 import java.time.LocalDate;
@@ -15,6 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -28,6 +33,7 @@ public class CalendarController {
     private final GetAcademicScheduleListService getAcademicScheduleListService;
     private final GetAssessmentScheduleListService getAssessmentScheduleListService;
     private final GetBirthdayListService getBirthdayListService;
+    private final UpdateCalendarSettingService updateCalendarSettingService;
 
     @GetMapping("/academics")
     @ResponseStatus(HttpStatus.OK)
@@ -60,5 +66,15 @@ public class CalendarController {
         Long userId = Long.valueOf(jwt.getSubject());
         Role role = Role.valueOf(jwt.getClaimAsString(JwtTokenProvider.CLAIM_ROLE));
         return getBirthdayListService.execute(userId, role, startDate, endDate);
+    }
+
+    @PatchMapping("/settings")
+    @ResponseStatus(HttpStatus.OK)
+    public UpdateCalendarSettingResponse updateCalendarSetting(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestBody UpdateCalendarSettingRequest request) {
+        Long userId = Long.valueOf(jwt.getSubject());
+        Role role = Role.valueOf(jwt.getClaimAsString(JwtTokenProvider.CLAIM_ROLE));
+        return updateCalendarSettingService.execute(userId, role, request);
     }
 }
